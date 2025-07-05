@@ -7,7 +7,7 @@ import {
   checkAppointmentTool,
   deleteAppointmentTool,
   scheduleAppointmentTool,
-} from "./appointment";
+} from "./tools/appointment";
 
 const MODEL = "gpt-4o-mini";
 
