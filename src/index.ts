@@ -7,7 +7,7 @@ import { appointmentFunctionMap } from "./appointment";
 const MODEL = "gpt-4o-mini";
 
 const client = new OpenAI({
-  apiKey: process.env.OPEN_API_KEY,
+  apiKey: process.env.OPENAPI_KEY,
 });
 
 const rl = readline.createInterface({
