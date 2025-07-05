@@ -1,6 +1,5 @@
-import "dotenv/config";
-import OpenAI from "openai";
 import { Agent, run } from "@openai/agents";
+import "dotenv/config";
 import readline from "readline";
 import { SYSTEM_PROMPT } from "./system";
 import {
