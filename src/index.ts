@@ -1,13 +1,21 @@
 import "dotenv/config";
 import OpenAI from "openai";
+import { Agent, run } from "@openai/agents";
 import readline from "readline";
 import { SYSTEM_PROMPT } from "./system";
-import { appointmentFunctionMap } from "./appointment";
+import {
+  checkAppointmentTool,
+  deleteAppointmentTool,
+  scheduleAppointmentTool,
+} from "./appointment";
 
 const MODEL = "gpt-4o-mini";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAPI_KEY,
+const agent = new Agent({
+  name: "Assistant",
+  instructions: SYSTEM_PROMPT,
+  model: MODEL,
+  tools: [checkAppointmentTool, scheduleAppointmentTool, deleteAppointmentTool],
 });
 
 const rl = readline.createInterface({
@@ -17,41 +25,19 @@ const rl = readline.createInterface({
 
 const messages = [] as any;
 
-messages.push({
-  role: "system",
-  content: SYSTEM_PROMPT,
-});
-
 async function sendToLLM(content: string) {
   messages.push({
     role: "user",
-    content,
+    content: content,
   });
-
-  const response = await client.chat.completions.create({
-    messages,
-    model: MODEL,
-  });
-
-  messages.push(response.choices[0].message);
-
-  return response.choices[0].message.content;
+  const result = await run(agent, messages);
+  return result.finalOutput;
 }
 
 async function processLLMResponse(response: any) {
   const parsedJson = JSON.parse(response);
-
   if (parsedJson.to == "user") {
-    console.log(parsedJson.message);
-  } else if (parsedJson.to == "system") {
-    const fn = parsedJson.functionCall.function;
-    const args = parsedJson.functionCall.arguments;
-
-    const functionResponse = appointmentFunctionMap[fn](...args);
-
-    await processLLMResponse(
-      await sendToLLM("response is " + functionResponse ? "true" : "false")
-    );
+    console.log("Ai: " + parsedJson.message);
   }
 }
 
